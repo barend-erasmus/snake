@@ -1,0 +1,29 @@
+{
+  "name": "snake",
+  "version": "1.0.0",
+  "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ut nibh in turpis aliquet cursus. In hac habitasse platea dictumst. Morbi justo ipsum, consectetur at sapien ultrices, porta mollis nunc",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc & browserify ./src/snake.js --s Snake -o ./src/bundle.js",
+    "test": "tsc & mocha ./src/**/*.test.js",
+    "coverage": "tsc & istanbul cover node_modules/mocha/bin/_mocha --root ./src ./src/**/*.test.js",
+    "deploy": "npm run build & ssh-deployer -f deploy.json --host developersworkspace.co.za --username username --password password --workspace ./"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/barend-erasmus/snake.git"
+  },
+  "author": "Barend Erasmus",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/barend-erasmus/snake/issues"
+  },
+  "homepage": "https://github.com/barend-erasmus/snake#readme",
+  "devDependencies": {
+    "@types/chai": "^4.0.4",
+    "@types/mocha": "^2.2.42",
+    "@types/node": "^8.0.24",
+    "chai": "^4.1.1",
+    "mocha": "^3.5.0"
+  }
+}
