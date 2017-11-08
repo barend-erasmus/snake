@@ -12,9 +12,12 @@ function makeArray(h, w, val) {
     return arr;
 }
 exports.makeArray = makeArray;
-function display(grounds, snakePath) {
+function display(grounds, snakePath, rewards) {
     for (const item of snakePath) {
         grounds[item.y][item.x] = 1;
+    }
+    for (const item of rewards) {
+        grounds[item.y][item.x] = 2;
     }
     const width = document.getElementById("box").parentElement.clientWidth;
     const height = width;
@@ -29,6 +32,10 @@ function display(grounds, snakePath) {
                 ctx.fillStyle = 'black';
                 ctx.fillRect(column * cellSize, row * cellSize, cellSize, cellSize);
             }
+            else if (grounds[row][column] === 2) {
+                ctx.fillStyle = 'red';
+                ctx.fillRect(column * cellSize, row * cellSize, cellSize, cellSize);
+            }
             else {
                 ctx.fillStyle = 'white';
                 ctx.fillRect(column * cellSize, row * cellSize, cellSize, cellSize);
@@ -37,9 +44,93 @@ function display(grounds, snakePath) {
     }
 }
 exports.display = display;
+function displayClear() {
+    const width = document.getElementById("box").parentElement.clientWidth;
+    const height = width;
+    const canvas = document.getElementById("box");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, width, height);
+}
+exports.displayClear = displayClear;
+function displayGameOver() {
+    const width = document.getElementById("box").parentElement.clientWidth;
+    const height = width;
+    const canvas = document.getElementById("box");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = 'black';
+    ctx.textAlign = 'center';
+    ctx.font = "30px Arial";
+    ctx.fillText("Game Over !!", width / 2, height / 2);
+}
+exports.displayGameOver = displayGameOver;
+function checkForRewards(snakePath, rewards) {
+    for (const [itemIndex, item] of snakePath.entries()) {
+        for (const [rewardIndex, reward] of rewards.entries()) {
+            if (reward.x === item.x && reward.y === item.y) {
+                rewards.splice(rewardIndex, 1);
+            }
+        }
+    }
+    return rewards;
+}
+exports.checkForRewards = checkForRewards;
+function generateRewards(rewards) {
+    for (let i = 0; i < 10; i++) {
+        rewards.push({
+            x: Math.floor(Math.random() * 50),
+            y: Math.floor(Math.random() * 50),
+        });
+    }
+    return rewards;
+}
+exports.generateRewards = generateRewards;
+function cycleSnakePath(currentDirection, snakePath) {
+    if (currentDirection === 0) {
+        snakePath.push({
+            x: snakePath[snakePath.length - 1].x,
+            y: snakePath[snakePath.length - 1].y - 1,
+        });
+        snakePath.shift();
+    }
+    else if (currentDirection === 1) {
+        snakePath.push({
+            x: snakePath[snakePath.length - 1].x,
+            y: snakePath[snakePath.length - 1].y + 1,
+        });
+        snakePath.shift();
+    }
+    else if (currentDirection === 2) {
+        snakePath.push({
+            x: snakePath[snakePath.length - 1].x - 1,
+            y: snakePath[snakePath.length - 1].y,
+        });
+        snakePath.shift();
+    }
+    else if (currentDirection === 3) {
+        snakePath.push({
+            x: snakePath[snakePath.length - 1].x + 1,
+            y: snakePath[snakePath.length - 1].y,
+        });
+        snakePath.shift();
+    }
+    if (snakePath[snakePath.length - 1].y < 0 || snakePath[snakePath.length - 1].y > 49 || snakePath[snakePath.length - 1].x < 0 || snakePath[snakePath.length - 1].x > 49) {
+        return null;
+    }
+    return snakePath;
+}
+exports.cycleSnakePath = cycleSnakePath;
 exports.currentDirection = 0;
 exports.snakePath = [];
+exports.rewards = [];
 function initialize() {
+    exports.currentDirection = 0;
+    exports.snakePath = [];
+    exports.rewards = generateRewards([]);
     exports.snakePath.push({
         x: Math.floor(50 / 2),
         y: Math.floor(50 / 2),
@@ -60,7 +151,7 @@ function initialize() {
         x: Math.floor(50 / 2) - 2,
         y: Math.floor(50 / 2) - 2,
     });
-    display(makeArray(50, 50, 0), exports.snakePath);
+    display(makeArray(50, 50, 0), exports.snakePath, exports.rewards);
     document.addEventListener('keyup', function (event) {
         if (event.key === 'ArrowUp') {
             exports.currentDirection = 0;
@@ -75,39 +166,25 @@ function initialize() {
             exports.currentDirection = 3;
         }
     });
-    setInterval(() => {
-        if (exports.currentDirection === 0 && exports.snakePath[exports.snakePath.length - 1].y) {
-            exports.snakePath.push({
-                x: exports.snakePath[exports.snakePath.length - 1].x,
-                y: exports.snakePath[exports.snakePath.length - 1].y - 1,
-            });
-            exports.snakePath.shift();
-        }
-        else if (exports.currentDirection === 1 && exports.snakePath[exports.snakePath.length - 1].y < 49) {
-            exports.snakePath.push({
-                x: exports.snakePath[exports.snakePath.length - 1].x,
-                y: exports.snakePath[exports.snakePath.length - 1].y + 1,
-            });
-            exports.snakePath.shift();
-        }
-        else if (exports.currentDirection === 2 && exports.snakePath[exports.snakePath.length - 1].x > 1) {
-            exports.snakePath.push({
-                x: exports.snakePath[exports.snakePath.length - 1].x - 1,
-                y: exports.snakePath[exports.snakePath.length - 1].y,
-            });
-            exports.snakePath.shift();
-        }
-        else if (exports.currentDirection === 3 && exports.snakePath[exports.snakePath.length - 1].x < 49) {
-            exports.snakePath.push({
-                x: exports.snakePath[exports.snakePath.length - 1].x + 1,
-                y: exports.snakePath[exports.snakePath.length - 1].y,
-            });
-            exports.snakePath.shift();
-        }
-        display(makeArray(50, 50, 0), exports.snakePath);
-    }, 200);
 }
 exports.initialize = initialize;
+function start() {
+    initialize();
+    displayClear();
+    let interval = setInterval(function () {
+        exports.snakePath = cycleSnakePath(exports.currentDirection, exports.snakePath);
+        if (exports.snakePath === null) {
+            clearInterval(interval);
+            displayClear();
+            displayGameOver();
+        }
+        else {
+            exports.rewards = checkForRewards(exports.snakePath, exports.rewards);
+            display(makeArray(50, 50, 0), exports.snakePath, exports.rewards);
+        }
+    }, 200);
+}
+exports.start = start;
 
 },{}]},{},[1])(1)
 });
