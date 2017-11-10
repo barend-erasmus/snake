@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import 'mocha';
 
-import { checkForRewards, cycleSnakePath, generateRewards } from './snake';
+import { removeRewards, cycleSnakePath, generateRewards, collectReward } from './snake';
 
 describe('generateRewards', () => {
     it('should return 10 rewards', () => {
@@ -11,9 +11,9 @@ describe('generateRewards', () => {
     });
 });
 
-describe('checkForRewards', () => {
+describe('removeRewards', () => {
     it('should remove rewards given snake path is in same location', () => {
-        const rewards: { x: number, y: number }[] = checkForRewards([
+        const rewards: { x: number, y: number }[] = removeRewards([
             {
                 x: 10,
                 y: 20,
@@ -33,6 +33,48 @@ describe('checkForRewards', () => {
     });
 });
 
+describe('collectReward', () => {
+    it('should return true given snake path is in same location', () => {
+        const result: boolean = collectReward([
+            {
+                x: 10,
+                y: 20,
+            },
+        ], [
+                {
+                    x: 10,
+                    y: 20,
+                },
+                {
+                    x: 30,
+                    y: 30,
+                },
+            ]);
+
+        expect(result).to.be.true;
+    });
+
+    it('should return false given snake path is not in same location', () => {
+        const result: boolean = collectReward([
+            {
+                x: 25,
+                y: 25,
+            },
+        ], [
+                {
+                    x: 10,
+                    y: 20,
+                },
+                {
+                    x: 30,
+                    y: 30,
+                },
+            ]);
+
+        expect(result).to.be.false;
+    });
+});
+
 describe('cycleSnakePath', () => {
     it('should move up given direction is up', () => {
         const snakePath: { x: number, y: number }[] = cycleSnakePath(0, [
@@ -46,11 +88,11 @@ describe('cycleSnakePath', () => {
             },
         ]);
 
-        expect(snakePath[0].x).to.be.eq(10);
-        expect(snakePath[0].y).to.be.eq(9);
-
         expect(snakePath[1].x).to.be.eq(10);
-        expect(snakePath[1].y).to.be.eq(8);
+        expect(snakePath[1].y).to.be.eq(9);
+
+        expect(snakePath[2].x).to.be.eq(10);
+        expect(snakePath[2].y).to.be.eq(8);
     });
 
     it('should move down given direction is down', () => {
@@ -65,11 +107,11 @@ describe('cycleSnakePath', () => {
             },
         ]);
 
-        expect(snakePath[0].x).to.be.eq(10);
-        expect(snakePath[0].y).to.be.eq(10);
-
         expect(snakePath[1].x).to.be.eq(10);
-        expect(snakePath[1].y).to.be.eq(11);
+        expect(snakePath[1].y).to.be.eq(10);
+
+        expect(snakePath[2].x).to.be.eq(10);
+        expect(snakePath[2].y).to.be.eq(11);
     });
 
     it('should move left given direction is left', () => {
@@ -84,11 +126,11 @@ describe('cycleSnakePath', () => {
             },
         ]);
 
-        expect(snakePath[0].x).to.be.eq(10);
-        expect(snakePath[0].y).to.be.eq(10);
-
-        expect(snakePath[1].x).to.be.eq(9);
+        expect(snakePath[1].x).to.be.eq(10);
         expect(snakePath[1].y).to.be.eq(10);
+
+        expect(snakePath[2].x).to.be.eq(9);
+        expect(snakePath[2].y).to.be.eq(10);
     });
 
     it('should move right given direction is right', () => {
@@ -103,10 +145,10 @@ describe('cycleSnakePath', () => {
             },
         ]);
 
-        expect(snakePath[0].x).to.be.eq(10);
-        expect(snakePath[0].y).to.be.eq(10);
-
-        expect(snakePath[1].x).to.be.eq(11);
+        expect(snakePath[1].x).to.be.eq(10);
         expect(snakePath[1].y).to.be.eq(10);
+
+        expect(snakePath[2].x).to.be.eq(11);
+        expect(snakePath[2].y).to.be.eq(10);
     });
 });

@@ -76,7 +76,20 @@ export function displayGameOver() {
     ctx.fillText("Game Over !!", width / 2, height / 2);
 }
 
-export function checkForRewards(snakePath: { x: number, y: number }[], rewards: { x: number, y: number }[]) {
+export function collectReward(snakePath: { x: number, y: number }[], rewards: { x: number, y: number }[]) {
+    let result: boolean = false;
+    for (const [itemIndex, item] of snakePath.entries()) {
+        for (const [rewardIndex, reward] of rewards.entries()) {
+            if (reward.x === item.x && reward.y === item.y) {
+                result = true;
+            }
+        }
+    }
+
+    return result;
+}
+
+export function removeRewards(snakePath: { x: number, y: number }[], rewards: { x: number, y: number }[]) {
     for (const [itemIndex, item] of snakePath.entries()) {
         for (const [rewardIndex, reward] of rewards.entries()) {
             if (reward.x === item.x && reward.y === item.y) {
@@ -105,27 +118,22 @@ export function cycleSnakePath(currentDirection: number, snakePath: { x: number,
             x: snakePath[snakePath.length - 1].x,
             y: snakePath[snakePath.length - 1].y - 1,
         });
-        snakePath.shift();
     } else if (currentDirection === 1) {
         snakePath.push({
             x: snakePath[snakePath.length - 1].x,
             y: snakePath[snakePath.length - 1].y + 1,
         });
-        snakePath.shift();
     } else if (currentDirection === 2) {
         snakePath.push({
             x: snakePath[snakePath.length - 1].x - 1,
             y: snakePath[snakePath.length - 1].y,
         });
-        snakePath.shift();
     } else if (currentDirection === 3) {
         snakePath.push({
             x: snakePath[snakePath.length - 1].x + 1,
             y: snakePath[snakePath.length - 1].y,
         });
-        snakePath.shift();
     }
-
 
     if (snakePath[snakePath.length - 1].y < 0 || snakePath[snakePath.length - 1].y > 49 || snakePath[snakePath.length - 1].x < 0 || snakePath[snakePath.length - 1].x > 49) {
         return null;
@@ -172,16 +180,17 @@ export function initialize() {
         y: Math.floor(50 / 2) - 2,
     });
 
+    displayClear();
     display(makeArray(50, 50, 0), snakePath, rewards);
 
     document.addEventListener('keyup', function (event) {
-        if (event.key === 'ArrowUp') {
+        if (event.key === 'ArrowUp'|| event.key === 'w') {
             currentDirection = 0;
-        } else if (event.key === 'ArrowDown') {
+        } else if (event.key === 'ArrowDown' || event.key === 's') {
             currentDirection = 1;
-        } else if (event.key === 'ArrowLeft') {
+        } else if (event.key === 'ArrowLeft'|| event.key === 'a') {
             currentDirection = 2;
-        } else if (event.key === 'ArrowRight') {
+        } else if (event.key === 'ArrowRight'|| event.key === 'd') {
             currentDirection = 3;
         }
     });
@@ -189,9 +198,9 @@ export function initialize() {
 
 export function start() {
     initialize();
-    displayClear();
 
     let interval = setInterval(function () {
+    
         snakePath = cycleSnakePath(currentDirection, snakePath);
 
         if (snakePath === null) {
@@ -199,7 +208,14 @@ export function start() {
             displayClear();
             displayGameOver();
         } else {
-            rewards = checkForRewards(snakePath, rewards);
+            
+            const collectedRewards: boolean = collectReward(snakePath, rewards);
+
+            if (collectedRewards === false) {
+                snakePath.shift();
+            }
+
+            rewards = removeRewards(snakePath, rewards);
 
             display(makeArray(50, 50, 0), snakePath, rewards);
         }
